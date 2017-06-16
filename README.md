@@ -29,27 +29,40 @@
     <p>creates plot of 6 variables (REF, VR, SPEC_W, Zdr, KDP, PHIDP), no QC, plot 2nd tilt level, phase unfolding</p>
 
 2.	python lvl2_plot.py --plot2 -f KDDC20160525_001527_V06.gz -q None -p 1 -u phase
-    <p>creates plot of REF and VR, no DBZ QC, plot 2nd title, phase unfolding</p>
+
+    *creates plot of REF and VR, no DBZ QC, plot 2nd title, phase unfolding*
 
 3.	python lvl2_plot.py --plot2 -f KDDC20160525_001527_V06.gz -q MetSignal -p 1 -u phase
-    <p>creates plot of REF and VR, MetSig QC, plot 2nd title, phase unfolding</p>
+
+    *creates plot of REF and VR, MetSig QC, plot 2nd title, phase unfolding*
 
 **Example command lines for opaws2d.py:**
 
 1.	python opaws2d.py -f KDDC20160525_001527_V06.gz -q None -p 1 –w -u phase
-    <p>no QC, plot 2nd tilt level, phase unfolding, -w to DART and netCDF files</p>
+
+    *opaws2d with no QC, plot 2nd tilt level, phase unfolding, -w to DART and netCDF files*
 
 2.	python opaws2d.py -f KDDC20160525_001527_V06.gz -q None -p 1 –w -u region
-    <p>no QC, plot 2nd tilt level, region unfolding, write out DART and netCDF files</p>
+    *opaws2d with no QC, plot 2nd tilt level, region unfolding, write out DART and netCDF files*
 
 3.	python opaws2d.py -f KDDC20160525_001527_V06.gz -q MetSignal -u phase
-    
-    *MetSig QC, plot 2nd title, phase unfolding, write out DART and netCDF files*
+    *opaws2d with MetSig QC, plot 2nd title, phase unfolding, write out DART and netCDF files*
 
-*You can compare the outputs from your tests to the files in KDDC directory.*
+**_You can compare the outputs from your tests to the files in KDDC directory_**
 </p>
 <h2><a id="user-content-motivation" class="anchor" href="#motivation" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Motivation</h2>
-<p>A short description of the motivation behind the creation and maintenance of the project. This should explain <strong>why</strong> the project exists.</p>
+<p>The current fortran-based OPAWS was written to do two things:  create a 3D Cartesian interpolated for dual-doppler analysis, or as a second (and added later option) superobb reflectivity and radial velocity data for storm-scale data assimilation.  Lacking was quality control on the data itself, a minimal unfolding technique, and only thresholding reflectivity as a form of QC.  pyOPAWS is written with several goals:  
+
+1.  modernize the data analysis with python (less code)
+
+2.  read level-II files directly (useful for realtime applications, as well as case studies)
+
+3.  incorporate the velocity unfolding algorithms available in the python ARM-CART toolkit
+
+4.  Incorporate reflectvity (and velocity, where needed) quality control via use of dual-pol data available from most radars today.
+
+
+</p>
 <h2><a id="user-content-installation" class="anchor" href="#installation" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Installation</h2>
 <p>Python packages Required:  pyart, numpy, scipy, optparse, netCDF4, datetime, pyproj.  Was built based on the Anaconda-2 system.
 

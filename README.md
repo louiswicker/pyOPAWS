@@ -26,7 +26,7 @@
 **Example command lines for lvl2_plot.py:**
 
 1.	python lvl2_plot.py -f KDDC20160525_001527_V06.gz -q None -p 1 -u phase
-    *creates plot of 6 variables (REF, VR, SPEC_W, Zdr, KDP, PHIDP), no QC, plot 2nd tilt level, phase unfolding*
+    <p>*creates plot of 6 variables (REF, VR, SPEC_W, Zdr, KDP, PHIDP), no QC, plot 2nd tilt level, phase unfolding*</p>
 
 2.	python lvl2_plot.py --plot2 -f KDDC20160525_001527_V06.gz -q None -p 1 -u phase
     *creates plot of REF and VR, no DBZ QC, plot 2nd title, phase unfolding*

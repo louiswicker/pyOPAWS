@@ -71,8 +71,18 @@
 3.	fcompile_cressman.py – compiles the fortran cressman routine, assumes GNU compiler is installed before the Anaconda python was installed.  Note:  “conda install libgfortran” can be helpful.
 4.	Once a “cressman.so” exists and can be loaded – opaws2d is ready to run
 </p>
-<h2><a id="user-content-api-reference" class="anchor" href="#api-reference" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>API Reference</h2>
-<p>Depending on the size of the project, if it is small and simple enough the reference docs can be added to the README. For medium size to larger projects it is important to at least provide a link to where the API reference docs live.</p>
+<h2><a id="user-content-api-reference" class="anchor" href="#api-reference" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>IMPORTANT INFORMATION-READ THIS!</h2>
+<p>
+
+There are several current limitations of the software - and the velocity unfolding has an important "buyer beward clause..."
+
+1.  Opaws2d.py has only been extensively tested on WSR-88D level-II archive files.  In theory (not practice), it should work on CFradial files with little modification (there is already the ability to read in data).  It has not yet been tested on CFradial files - particularily with the data QC.  Use "-q None" if you want to grid a CFradial file. 
+
+2.  Split cut level-II files created from the superres levels are difficult to manage.  For example, the reflectivity and dual-pol variables are all on one sweep, and radial velocity is on the next sweep.  The code "maps" which levels go together, BUT, on superres radial velocity sweeps, there is ALSO reflectivity (only).  So for simple masking, the reflectivity collected with the radial velocity is used.  For more complicated QC, then the mapped sweep is used to QC the radial velocity.
+
+3.  For level-II collection with dual-PRF (PRT?), I cannot find documentation as to what velocity field is stored in the level-II file, except that it is NOT unfolded.  The pyART unfolding algorithms CANNOT handle multiple nyquists on a single sweep, which is what is stored in the file.  The way it currently works is that the nyquist velocity for a sweep is reset to the minimum nyquist velocity on that sweep, and then the unfolding algorithm is applied.  Comparing to level-III data from the same sweep, it seems to work.  But its unclear what is going on here, and if anyone knows better - please contact me.
+
+</p>
 <h2><a id="user-content-tests" class="anchor" href="#tests" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Tests</h2>
 
 <p> To test the scripts:  

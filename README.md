@@ -26,23 +26,24 @@
 **Example command lines for lvl2_plot.py:**
 
 1.	python lvl2_plot.py -f KDDC20160525_001527_V06.gz -q None -p 1 -u phase
-    <p>*creates plot of 6 variables (REF, VR, SPEC_W, Zdr, KDP, PHIDP), no QC, plot 2nd tilt level, phase unfolding*</p>
+    <p>creates plot of 6 variables (REF, VR, SPEC_W, Zdr, KDP, PHIDP), no QC, plot 2nd tilt level, phase unfolding</p>
 
 2.	python lvl2_plot.py --plot2 -f KDDC20160525_001527_V06.gz -q None -p 1 -u phase
-    *creates plot of REF and VR, no DBZ QC, plot 2nd title, phase unfolding*
+    <p>creates plot of REF and VR, no DBZ QC, plot 2nd title, phase unfolding</p>
 
 3.	python lvl2_plot.py --plot2 -f KDDC20160525_001527_V06.gz -q MetSignal -p 1 -u phase
-    *creates plot of REF and VR, MetSig QC, plot 2nd title, phase unfolding*
+    <p>creates plot of REF and VR, MetSig QC, plot 2nd title, phase unfolding</p>
 
 **Example command lines for opaws2d.py:**
 
 1.	python opaws2d.py -f KDDC20160525_001527_V06.gz -q None -p 1 –w -u phase
-    *no QC, plot 2nd tilt level, phase unfolding, -w to DART and netCDF files*
+    <p>no QC, plot 2nd tilt level, phase unfolding, -w to DART and netCDF files</p>
 
 2.	python opaws2d.py -f KDDC20160525_001527_V06.gz -q None -p 1 –w -u region
-    *no QC, plot 2nd tilt level, region unfolding, write out DART and netCDF files*
+    <p>no QC, plot 2nd tilt level, region unfolding, write out DART and netCDF files</p>
 
 3.	python opaws2d.py -f KDDC20160525_001527_V06.gz -q MetSignal -u phase
+    
     *MetSig QC, plot 2nd title, phase unfolding, write out DART and netCDF files*
 
 *You can compare the outputs from your tests to the files in KDDC directory.*

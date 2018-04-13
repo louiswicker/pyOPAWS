@@ -74,11 +74,11 @@ truelat1, truelat2 = 30.0, 60.0
 
 # Parameter dict for Gridding
 _grid_dict = {
-              'grid_spacing_xy' : 5000.,         # meters
+              'grid_spacing_xy' : 4000.,         # meters
               'domain_radius_xy': 150000.,       # meters
               'anal_method'     : 'Cressman',    # options are Cressman, Barnes (1-pass)
-              'ROI'             : 5000./0.707,   # Cressman ~ analysis_grid * sqrt(2), Barnes ~ largest data spacing in radar
-              'min_count'       : 6,             # regular radar data ~3, high-res radar data ~ 10
+              'ROI'             : 4000./0.707,   # Cressman ~ analysis_grid * sqrt(2), Barnes ~ largest data spacing in radar
+              'min_count'       : 3,             # regular radar data ~3, high-res radar data ~ 10
               'min_weight'      : 0.2,           # min weight for analysis Cressman ~ 0.3, Barnes ~ 2
               'min_range'       : 10000.,        # min distance away from the radar for valid analysis (meters)
               'projection'      : 'lcc',         # map projection to use for gridded data
@@ -794,8 +794,8 @@ if __name__ == "__main__":
       
        else:
            in_filenames.append(os.path.abspath(options.fname))
-           strng = os.path.basename(in_filenames[0])[0:-3]
-           strng = strng[0:5] + "_" + strng[5:]
+           strng = os.path.basename(in_filenames[0]).split("_V06")[0]
+           strng = strng[0:4] + "_" + strng[4:]
            strng = os.path.join(options.out_dir, strng)
            out_filenames.append(strng) 
 
@@ -808,7 +808,7 @@ if __name__ == "__main__":
  
        if in_filenames[0][-3:] == "V06" or in_filenames[0][-6:] == "V06.gz":
            for item in in_filenames:
-               strng = os.path.basename(item)[0:17]
+               strng = os.path.basename(item).split("_V06")[0]
                strng = strng[0:4] + "_" + strng[4:]
                strng = os.path.join(options.out_dir, strng)
                out_filenames.append(strng) 

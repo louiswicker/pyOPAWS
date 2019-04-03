@@ -95,7 +95,7 @@ _grid_dict = {
 # Parameter dict setting radar data parameters
                
 _radar_parameters = {
-                     'min_dbz_analysis': 30.0, 
+                     'min_dbz_analysis': 10.0, 
                      'max_range': 150000.,
                      'max_Nyquist_factor': 2,                    # dont allow output of velocities > Nyquist*factor
                      'field_label_trans': [False, "DBZC", "VR"]  # RaxPol 31 May - must specify for edit sweep files
@@ -197,22 +197,27 @@ def vel_masking(vel, ref, volume):
 
 # Mask the radial velocity where dbz is masked
 
-   vel.data.mask = np.logical_or(vel.data.mask, ref.data[...] < _radar_parameters['min_dbz_analysis'])
+   print "Size of input VR  mask ", np.sum(vel.data.mask)
+   print "Size of input dBZ mask ", np.sum(ref.data.mask)
+
+   vel.data.mask = np.logical_or(vel.data.mask, ref.data.mask)
 
 # Limit max/min values of radial velocity (bad unfolding, too much "truth")
 
-   for m in np.arange(volume.nsweeps):
-       Vr_max = volume.get_nyquist_vel(m)
-       mask1  = (np.abs(vel.data[m]) > _radar_parameters['max_Nyquist_factor']*Vr_max)                 
-       vel.data.mask[m] = np.logical_or(vel.data.mask[m], mask1)
+#  Commented out because of high velocities in hurricanes
+
+#  for m in np.arange(volume.nsweeps):
+#      Vr_max = volume.get_nyquist_vel(m)
+#      mask1  = (np.abs(vel.data[m]) > _radar_parameters['max_Nyquist_factor']*Vr_max)                 
+#      vel.data.mask[m] = np.logical_or(vel.data.mask[m], mask1)
         
    if _grid_dict['max_height'] > 0:
       mask1 = (vel.zg - vel.radar_hgt) > _grid_dict['max_height']
-      print "size of height mask: ", np.sum(mask1)
+      print "Size of height mask: ", np.sum(mask1)
       mask2 = vel.data.mask
-      print "size of ref mask ", np.sum(mask2)
+      print "Size of VR + dBZ mask: ", np.sum(mask2)
       vel.data.mask = np.logical_or(mask1, mask2)
-      print "size of new mask ", np.sum(vel.data.mask)
+      print "Size of new mask ", np.sum(vel.data.mask)
       
    return vel
       
@@ -969,6 +974,11 @@ if __name__ == "__main__":
        
        else:
            vel = grid_data(volume, "unfolded velocity", LatLon=cLatLon)
+
+# Mask it off based on dictionary parameters set at top
+
+       if _grid_dict['mask_vr_with_dbz']:
+           vel = vel_masking(vel, ref, volume)
     
        opaws2D_regrid_cpu = timeit.time() - tim0
   

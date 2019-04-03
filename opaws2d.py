@@ -33,7 +33,7 @@ import scipy.interpolate
 import scipy.ndimage as ndimage
 import scipy.spatial
 from optparse import OptionParser
-from mpl_toolkits.axes_grid1.anchored_artists import AnchoredText
+from matplotlib.offsetbox import AnchoredText
 import netCDF4 as ncdf
 import datetime as DT
 
@@ -42,6 +42,9 @@ from radar_QC import *
 
 import cressman
 import pyart
+
+import warnings
+warnings.filterwarnings("ignore")
 
 from pyproj import Proj
 import pylab as plt  
@@ -74,10 +77,10 @@ truelat1, truelat2 = 30.0, 60.0
 
 # Parameter dict for Gridding
 _grid_dict = {
-              'grid_spacing_xy' : 4000.,         # meters
+              'grid_spacing_xy' : 3000.,         # meters
               'domain_radius_xy': 150000.,       # meters
               'anal_method'     : 'Cressman',    # options are Cressman, Barnes (1-pass)
-              'ROI'             : 4000./0.707,   # Cressman ~ analysis_grid * sqrt(2), Barnes ~ largest data spacing in radar
+              'ROI'             : 1000.,         # Cressman ~ analysis_grid * sqrt(2), Barnes ~ largest data spacing in radar
               'min_count'       : 3,             # regular radar data ~3, high-res radar data ~ 10
               'min_weight'      : 0.2,           # min weight for analysis Cressman ~ 0.3, Barnes ~ 2
               'min_range'       : 10000.,        # min distance away from the radar for valid analysis (meters)
@@ -95,7 +98,7 @@ _grid_dict = {
 # Parameter dict setting radar data parameters
                
 _radar_parameters = {
-                     'min_dbz_analysis': 10.0, 
+                     'min_dbz_analysis': 25.0, 
                      'max_range': 150000.,
                      'max_Nyquist_factor': 2,                    # dont allow output of velocities > Nyquist*factor
                      'field_label_trans': [False, "DBZC", "VR"]  # RaxPol 31 May - must specify for edit sweep files
@@ -109,6 +112,10 @@ _obs_errors = {
                 'velocity'      : 3.0
               }
         
+# List for when window is used to find a file within a specific window - units are minutes
+           
+_window_param = [ -5, 2 ]
+
 #=========================================================================================
 # Class variable used as container
 
@@ -197,8 +204,8 @@ def vel_masking(vel, ref, volume):
 
 # Mask the radial velocity where dbz is masked
 
-   print "Size of input VR  mask ", np.sum(vel.data.mask)
-   print "Size of input dBZ mask ", np.sum(ref.data.mask)
+   print(" Size of input VR  mask ", np.sum(vel.data.mask))
+   print(" Size of input dBZ mask ", np.sum(ref.data.mask))
 
    vel.data.mask = np.logical_or(vel.data.mask, ref.data.mask)
 
@@ -213,11 +220,11 @@ def vel_masking(vel, ref, volume):
         
    if _grid_dict['max_height'] > 0:
       mask1 = (vel.zg - vel.radar_hgt) > _grid_dict['max_height']
-      print "Size of height mask: ", np.sum(mask1)
+      print(" Size of height mask: ", np.sum(mask1))
       mask2 = vel.data.mask
-      print "Size of VR + dBZ mask: ", np.sum(mask2)
+      print(" Size of VR + dBZ mask: ", np.sum(mask2))
       vel.data.mask = np.logical_or(mask1, mask2)
-      print "Size of new mask ", np.sum(vel.data.mask)
+      print(" Size of new mask ", np.sum(vel.data.mask))
       
    return vel
       
@@ -740,7 +747,10 @@ if __name__ == "__main__":
                      
    parser.add_option("-f", "--file",      dest="fname",     default=None,  type="string", \
            help = "filename of NEXRAD level II volume or cfradial file to process")
-                     
+
+   parser.add_option(      "--window",    dest="window",    type="string", default=None,  \
+                                    help = "Time of window location in YYYY,MM,DD,HH")
+
    parser.add_option("-u", "--unfold",    dest="unfold",    default="region",  type="string", \
            help = "dealiasing method to use (phase or region, default = phase)")
                      
@@ -767,14 +777,12 @@ if __name__ == "__main__":
                      
    parser.add_option("-s", "--shapefiles", dest="shapefiles", default=None, type="string",    \
            help = "Name of system env shapefile you want to add to the plots.")
-                     
+
    parser.add_option(      "--newse",    dest="newse",    type="string", default=None, \
            help = "NEWSe radars description file to parse for model grid lat and lon" )
 
    (options, args) = parser.parse_args()
   
-   parser.print_help()
-
    print ''
    print ' ================================================================================'
 
@@ -806,10 +814,6 @@ if __name__ == "__main__":
 
    else:
        in_filenames = glob.glob("%s/*" % os.path.abspath(options.dname))
-       print("\n opaws2D:  Processing %d files in the directory:  %s\n" % (len(in_filenames), options.dname))
-       print("\n opaws2D:  First file is %s\n" % (in_filenames[0]))
-       print("\n opaws2D:  Last  file is %s\n" % (in_filenames[-1]))
-       print("\n opaws2D:  Last  file is %s\n" % (in_filenames[0][-3:]))
  
        if in_filenames[0][-3:] == "V06" or in_filenames[0][-6:] == "V06.gz":
            for item in in_filenames:
@@ -817,16 +821,13 @@ if __name__ == "__main__":
                strng = strng[0:4] + "_" + strng[4:]
                strng = os.path.join(options.out_dir, strng)
                out_filenames.append(strng) 
-               print(strng)
         
        if in_filenames[0][-3:] == ".nc":
            for item in in_filenames:
                strng = os.path.basename(item).split(".")[0:2]
-               print strng
                strng = strng[0] + "_" + strng[1]
                strng = os.path.join(options.out_dir, strng)
                out_filenames.append(strng) 
-               print strng
 
    if options.unfold == "phase":
        print "\n opaws2D dealias_unwrap_phase unfolding will be used\n"
@@ -863,11 +864,31 @@ if __name__ == "__main__":
        if not os.path.exists("images"):
            os.mkdir("images")
 
+   if options.window == None:
+       print("\n NO WINDOW SUPPLIED, PROCESSING WHOLE DIRECTORY.... \n ")
+       print("\n opaws2D:  Processing %d files in the directory:  %s\n" % (len(in_filenames), options.dname))
+       print("\n opaws2D:  First file is %s" % (in_filenames[0]))
+       print("\n opaws2D:  Last  file is %s" % (in_filenames[-1]))
+   else:
+       print("\n WINDOW IS SUPPLIED, WILL LOOK FOR INDIVIDUAL FILE.... \n ")
+       start_time = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[0])
+       stop_time  = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[1])
+       print("\n WINDOW_START:  %s" % start_time.strftime("%Y%m%d%H%M") )
+       print(" WINDOW_END:    %s" % stop_time.strftime("%Y%m%d%H%M") )
+                     
 # Read input file and create radar object
 
    t0 = timeit.time()
 
    for n, fname in enumerate(in_filenames):
+
+# If window is specified, then find the file that fits in the window
+       if options.window:
+           file_time = DT.datetime.strptime(os.path.basename(fname)[4:19], "%Y%m%d_%H%M%S")
+           if file_time < start_time or file_time >= stop_time:
+               continue
+           else:
+               print("\n FILE TIME WITHIN WINDOW:   %s" % file_time.strftime("%Y,%m,%d,%H,%M,%S") )
 
        print '\n Reading: {}\n'.format(fname)
        print '\n Writing: {}\n'.format(out_filenames[n])
@@ -877,7 +898,7 @@ if __name__ == "__main__":
  # the check for file size is to make sure there is data in the LVL2 file
        try:
            if os.path.getsize(fname) < 2048000:
-               print '\n File {} is less than 2 mb, skipping...\n'.format(fname)
+               print '\n File {} is less than 2 mb, skipping...'.format(fname)
                continue
        except:
            continue
@@ -947,11 +968,11 @@ if __name__ == "__main__":
        tim0 = timeit.time()
 
        if options.qc == "None":
-           print("\n No quality control will be done on data\n")
+           print("\n No quality control will be done on data")
            gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = False, \
                                     max_range = _radar_parameters['max_range'])
        else:
-           print("\n QC type:  %s \n" % options.qc)
+           print("\n QC type:  %s " % options.qc)
            gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = _thres_vr_from_ref, \
                                     max_range = _radar_parameters['max_range'])
 

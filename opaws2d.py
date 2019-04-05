@@ -26,6 +26,7 @@
 import os
 import sys
 import glob
+import re
 import time as timeit
 
 import numpy as np
@@ -55,6 +56,10 @@ from pyart.graph import cm
 # Ignore annoying warnings (unless the code breaks, then comment these lines out)
 import warnings
 #warnings.filterwarnings("ignore")
+
+# re grep pattern to harden file data & time parsing
+parse_radar_name2 = '(?:[A-Z]{4}_)'
+parse_radar_name = '(?:[A-Z]{4}_)'
 
 # debug flag
 debug = True
@@ -100,7 +105,7 @@ _grid_dict = {
 _radar_parameters = {
                      'min_dbz_analysis': 25.0, 
                      'max_range': 150000.,
-                     'max_Nyquist_factor': 2,                    # dont allow output of velocities > Nyquist*factor
+                     'max_Nyquist_factor': 4,                    # dont allow output of velocities > Nyquist*factor
                      'field_label_trans': [False, "DBZC", "VR"]  # RaxPol 31 May - must specify for edit sweep files
                     }
 
@@ -204,8 +209,8 @@ def vel_masking(vel, ref, volume):
 
 # Mask the radial velocity where dbz is masked
 
-   print(" Size of input VR  mask ", np.sum(vel.data.mask))
-   print(" Size of input dBZ mask ", np.sum(ref.data.mask))
+   print(" Size of input VR  mask: %d" % np.sum(vel.data.mask))
+   print(" Size of input dBZ mask: %d" % np.sum(ref.data.mask))
 
    vel.data.mask = np.logical_or(vel.data.mask, ref.data.mask)
 
@@ -220,11 +225,11 @@ def vel_masking(vel, ref, volume):
         
    if _grid_dict['max_height'] > 0:
       mask1 = (vel.zg - vel.radar_hgt) > _grid_dict['max_height']
-      print(" Size of height mask: ", np.sum(mask1))
+      print(" Size of height mask: %d" % np.sum(mask1))
       mask2 = vel.data.mask
-      print(" Size of VR + dBZ mask: ", np.sum(mask2))
+      print(" Size of VR + dBZ mask: %d" % np.sum(mask2))
       vel.data.mask = np.logical_or(mask1, mask2)
-      print(" Size of new mask ", np.sum(vel.data.mask))
+      print(" Size of new mask: %d" % np.sum(vel.data.mask))
       
    return vel
       
@@ -485,7 +490,7 @@ def plot_gridded(ref, vel, sweep, fsuffix=None, dir=".", shapefiles=None, intera
       print("\n opaws2D.grid_plot:  No output file name is given, writing to %s" % "VR_RF_...png")
       filename = "%s/VR_RF_%2.2d_plot.pdf" % (dir, sweep)
   else:
-       filename = "%s/VR_RF_%2.2d_%s.pdf" % (dir, sweep, fsuffix.split("/")[1])
+       filename = "%s_%2.2d.pdf" % (os.path.join(dir, fsuffix), sweep)
 
   fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(25,14))
   
@@ -749,13 +754,16 @@ if __name__ == "__main__":
            help = "filename of NEXRAD level II volume or cfradial file to process")
 
    parser.add_option(      "--window",    dest="window",    type="string", default=None,  \
-                                    help = "Time of window location in YYYY,MM,DD,HH")
+                                    help = "Time of window location in YYYY,MM,DD,HH,MM")
 
    parser.add_option("-u", "--unfold",    dest="unfold",    default="region",  type="string", \
            help = "dealiasing method to use (phase or region, default = phase)")
                      
    parser.add_option("-w", "--write",     dest="write",   default=False, \
            help = "Boolean flag to write DART ascii file", action="store_true")
+                     
+   parser.add_option(      "--onlyVR",     dest="onlyVR",   default=False, \
+           help = "Boolean flag to only write VR to DART ascii file", action="store_true")
                      
    parser.add_option(     "--method",     dest="method",   default=None, type="string", \
            help = "Function to use for the weight process, valid strings are:  Cressman or Barnes")
@@ -813,19 +821,24 @@ if __name__ == "__main__":
            out_filenames.append(strng) 
 
    else:
-       in_filenames = glob.glob("%s/*" % os.path.abspath(options.dname))
+
+       if options.window:
+           ttime = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M")
+           in_filenames = glob.glob("%s/*_%s_*" % (os.path.abspath(options.dname),ttime.strftime("%Y%m%d")))
+       else:
+           in_filenames = glob.glob("%s/*" % os.path.abspath(options.dname))
  
-       if in_filenames[0][-3:] == "V06" or in_filenames[0][-6:] == "V06.gz":
-           for item in in_filenames:
-               strng = os.path.basename(item).split("_V06")[0]
-               strng = strng[0:4] + "_" + strng[4:]
-               strng = os.path.join(options.out_dir, strng)
-               out_filenames.append(strng) 
-        
+# if cfradial files....
        if in_filenames[0][-3:] == ".nc":
            for item in in_filenames:
                strng = os.path.basename(item).split(".")[0:2]
                strng = strng[0] + "_" + strng[1]
+               strng = os.path.join(options.out_dir, strng)
+               out_filenames.append(strng) 
+# WSR88D files
+       else:
+           for item in in_filenames:
+               strng = os.path.basename(item)[0:18]
                strng = os.path.join(options.out_dir, strng)
                out_filenames.append(strng) 
 
@@ -873,8 +886,8 @@ if __name__ == "__main__":
        print("\n WINDOW IS SUPPLIED, WILL LOOK FOR INDIVIDUAL FILE.... \n ")
        start_time = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[0])
        stop_time  = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[1])
-       print("\n WINDOW_START:  %s" % start_time.strftime("%Y%m%d%H%M") )
-       print(" WINDOW_END:    %s" % stop_time.strftime("%Y%m%d%H%M") )
+       print("\n WINDOW_START:  %s" % start_time.strftime("%Y,%m,%d,%H,%M") )
+       print(" WINDOW_END:    %s" % stop_time.strftime("%Y,%m,%d,%H,%M") )
                      
 # Read input file and create radar object
 
@@ -884,14 +897,22 @@ if __name__ == "__main__":
 
 # If window is specified, then find the file that fits in the window
        if options.window:
-           file_time = DT.datetime.strptime(os.path.basename(fname)[4:19], "%Y%m%d_%H%M%S")
+           
+           try:
+               parsed_file_DT = "%s" % re.split(parse_radar_name, os.path.basename(fname))[1]
+           except IndexError:
+               print os.path.basename(fname)
+               pass
+
+           file_time = DT.datetime.strptime("%s" % parsed_file_DT[0:13], "%Y%m%d_%H%M")
+           print file_time
            if file_time < start_time or file_time >= stop_time:
                continue
            else:
-               print("\n FILE TIME WITHIN WINDOW:   %s" % file_time.strftime("%Y,%m,%d,%H,%M,%S") )
-
-       print '\n Reading: {}\n'.format(fname)
-       print '\n Writing: {}\n'.format(out_filenames[n])
+               print n
+               print("\n FILE TIME WITHIN WINDOW:   %s" % file_time.strftime("%Y,%m,%d,%H,%M") )
+               print '\n Reading: {}\n'.format(fname)
+               print '\n Writing: {}\n'.format(out_filenames[n])
    
        tim0 = timeit.time()
 
@@ -1008,14 +1029,16 @@ if __name__ == "__main__":
        print '\n ================================================================================'
 
        if plot_grid:
-           fplotname = out_filenames[n]
+           fplotname = os.path.basename(out_filenames[n])
            plottime = plot_gridded(ref, vel, sweep_num, fsuffix=fplotname, dir=options.out_dir, \
                       shapefiles=options.shapefiles, interactive=options.interactive, LatLon=cLatLon)
 
        if options.write == True:      
            ret = write_DART_ascii(vel, filename=out_filenames[n]+"_VR", grid_dict=_grid_dict, \
                                   obs_error=[_obs_errors['velocity']] )
-           ret = write_DART_ascii(ref, filename=out_filenames[n]+"_RF", grid_dict=_grid_dict, \
+
+           if options.onlyVR != True:
+               ret = write_DART_ascii(ref, filename=out_filenames[n]+"_RF", grid_dict=_grid_dict, \
                                   obs_error=[_obs_errors['reflectivity'], _obs_errors['0reflectivity']])
            
            ret = write_radar_file(ref, vel, filename=out_filenames[n])

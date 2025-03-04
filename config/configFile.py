@@ -25,7 +25,7 @@ _obs_errors = {
               'reflectivity'  : 5.0,
               '0reflectivity' : 5.0, 
               'velocity'      : 3.0
-                 }
+              }
 
 # Parameter dict setting radar data parameters
                

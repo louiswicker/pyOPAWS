@@ -1,0 +1,34 @@
+# Basic environment for Py-ART.
+name: pyart_env2
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - gfortran=12
+  - Basemap
+  - meson
+  - numpy
+  - scipy
+  - matplotlib
+  - netcdf4
+  - wradlib
+  - cartopy
+  - arm_pyart
+  - xarray
+  - xradar
+  - mda-xdrlib
+  - pip
+  - cmweather
+  - pip:
+    - wheel
+    - watchdog
+    - flake8
+    - tox
+    - coverage
+    - Sphinx
+    - twine
+    - pytest
+    - black
+    - isort
+    - pre_commit

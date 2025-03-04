@@ -21,9 +21,9 @@
     <article class="markdown-body entry-content" itemprop="text"><h2><a id="user-content-synopsis" class="anchor" href="#synopsis" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Synopsis</h2>
 <p>pyOPAWS is intended to be a replacement package for David Dowell and Lou Wicker's OPAWS radar gridding software (Observation Processing and Wind Synthesis) that was originally created in the late 1990's and became used by a number of groups during the last 10 years.  The original code was capable of reading DORADE sweep files and later CFradial files created from operational radars or a variety of mobile radars.  The code is intended to replace the original fortran and C code, be able to process WSR-88D level-II files directly. However, it is not capable or reading DORADE format, only level-II and CFradial are supported.  This is due to the use of the python ARM-CART toolkit for radar ingest and processing as its base</p>
 
+**There are two main programs - one for superobbing the radar fields (opaws2d), and one simply for plotting Level-II data (lvl2_plot)
 
 <h2><a id="user-content-installation" class="anchor" href="#installation" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Installation</h2>
-**Example command lines for lvl2_plot.py:**
 
 <p>In the directory there is a environment.yml file which creates an environment called "opaws_env".  Create the enviroment using conda, "conda env create -f environment.yml" 
 
@@ -34,6 +34,8 @@
 <p>
 
 <h2><a id="user-content-code-example" class="anchor" href="#code-example" aria-hidden="true"><svg aria-hidden="true" class="octicon octicon-link" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Usage Examples</h2>
+
+**Example command lines for lvl2_plot.py:**
 
 1.	python lvl2_plot.py -f KOUN20110524_224700_V06 -q None -p 1 -u phase
     <p>creates plot of 6 variables (REF, VR, SPEC_W, Zdr, KDP, PHIDP), no QC, plot 2nd tilt level, phase unfolding</p>

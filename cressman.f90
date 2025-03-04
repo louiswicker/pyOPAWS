@@ -84,7 +84,7 @@
 
 
      IF ((w_sum .ge. min_weight) .and. (count .ge. min_count)) THEN
-        anal(i,j) = anal(i,j) + sum/w_sum
+        anal(i,j) = anal(i,j) + DBLE(sum/w_sum)
      ENDIF
 
     ENDDO

@@ -55,8 +55,8 @@ def volume_mapping(radar):
            radar.velocity.append(n)
            n += 1
 
-   print("\n Number of reflectivity levels:  %d" % len(radar.reflectivity))
-   print("\n Number of radial velocity  levels:  %d\n" % len(radar.velocity))
+   print(("\n Number of reflectivity levels:  %d" % len(radar.reflectivity)))
+   print(("\n Number of radial velocity  levels:  %d\n" % len(radar.velocity)))
    
    return True
 ########################################################################
@@ -238,9 +238,9 @@ def MetSignal(radar, sweep = 0, v_sweep = None):
        std_rhv = texture(rhv[na])
        
        if _verbose_QC:
-           print na, "PHI_STD: ", std_phi.max(), std_phi.min()
-           print na, "ZDR_STD: ", std_zdr.max(), std_zdr.min()
-           print na, "RHV_STD: ", std_rhv.max(), std_rhv.min()
+           print(na, "PHI_STD: ", std_phi.max(), std_phi.min())
+           print(na, "ZDR_STD: ", std_zdr.max(), std_zdr.min())
+           print(na, "RHV_STD: ", std_rhv.max(), std_rhv.min())
 
        signal_value    = np.zeros(dbz.shape[1])
        signal_strength = np.zeros(dbz.shape[1]) 
@@ -338,7 +338,7 @@ def volume_prep(radar, QC_type = "Minimal", thres_vr_from_ref = False, max_range
    elif QC_type == "MetSignal" or QC_type[0:3] == "Met":
   
        for n, m in radar.sweep_table:
-           print("\n Processing sweep: %d " % n)
+           print(("\n Processing sweep: %d " % n))
            metsignal = MetSignal(radar, sweep=n, v_sweep=n)
            metsig_vr_mask = (metsignal > _met_signal_mask_value['velocity']) 
            metsig_dbz_mask  = (metsignal > _met_signal_mask_value['reflectivity'])
@@ -363,13 +363,13 @@ def volume_prep(radar, QC_type = "Minimal", thres_vr_from_ref = False, max_range
            ref_mask  = (radar.get_field(n, 'reflectivity').data < _min_dbz)
 
            if _verbose_QC: 
-               print("\n SimpleQC:  ZdR   > thres:  %f  Number of gates removed:  %d" %( _zdr_filter, np.sum(zdr_mask == True)))
-               print("\n SimpleQC:  RHOHV < thres:  %f  Number of gates removed:  %d" %( _rhv_filter, np.sum(ccr_mask == True)))
-               print("\n SimpleQC:  SPWTH > thres:  %f  Number of gates removed:  %d" %( _spw_filter, np.sum(spw_mask == True)))   
-               print("\n SimpleQC:  Number of valid DBZ gates before dual-pol masking:  %d  " % 
-                         np.sum(radar.get_field(n, 'reflectivity').mask == False))
-               print("\n SimpleQC:  Number of valid Velocity gates before dual-pol masking:  %d  " % 
-                         np.sum(radar.get_field(m, 'velocity').mask == False))
+               print(("\n SimpleQC:  ZdR   > thres:  %f  Number of gates removed:  %d" %( _zdr_filter, np.sum(zdr_mask == True))))
+               print(("\n SimpleQC:  RHOHV < thres:  %f  Number of gates removed:  %d" %( _rhv_filter, np.sum(ccr_mask == True))))
+               print(("\n SimpleQC:  SPWTH > thres:  %f  Number of gates removed:  %d" %( _spw_filter, np.sum(spw_mask == True))))   
+               print(("\n SimpleQC:  Number of valid DBZ gates before dual-pol masking:  %d  " % 
+                         np.sum(radar.get_field(n, 'reflectivity').mask == False)))
+               print(("\n SimpleQC:  Number of valid Velocity gates before dual-pol masking:  %d  " % 
+                         np.sum(radar.get_field(m, 'velocity').mask == False)))
    
            radar.get_field(n, 'reflectivity').mask = (((radar.get_field(n, 'reflectivity').mask) | ccr_mask) | zdr_mask | ref_mask)
    
@@ -381,10 +381,10 @@ def volume_prep(radar, QC_type = "Minimal", thres_vr_from_ref = False, max_range
                radar.get_field(m, 'velocity').mask = (((radar.get_field(m, 'velocity').mask | ref_mask) ) )
 
            if _verbose_QC: 
-               print("\n SimpleQC:  Number of valid DBZ gates after dual-pol masking:  %d  " % 
-                         np.sum(radar.get_field(n, 'reflectivity').mask == False))
-               print("\n SimpleQC:  Number of valid Velocity gates after spectrum width masking:  %d \n" % 
-                         np.sum(radar.get_field(m, 'velocity').mask == False))
+               print(("\n SimpleQC:  Number of valid DBZ gates after dual-pol masking:  %d  " % 
+                         np.sum(radar.get_field(n, 'reflectivity').mask == False)))
+               print(("\n SimpleQC:  Number of valid Velocity gates after spectrum width masking:  %d \n" % 
+                         np.sum(radar.get_field(m, 'velocity').mask == False)))
   
 # pyart.correct.despeckle.despeckle_field(radar, 'velocity', threshold=-100, size=10, gatefilter=gatefilter, delta=5.0)
 # pyart.correct.despeckle.despeckle_field(radar, 'reflectivity', threshold=-100, size=100, gatefilter=gatefilter, delta=5.0)

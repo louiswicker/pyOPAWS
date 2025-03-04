@@ -25,30 +25,28 @@
 
 **Example command lines for lvl2_plot.py:**
 
-1.	python lvl2_plot.py -f KDDC20160525_001527_V06.gz -q None -p 1 -u phase
+1.	python lvl2_plot.py -f KOUN20110524_224700_V06 -q None -p 1 -u phase
     <p>creates plot of 6 variables (REF, VR, SPEC_W, Zdr, KDP, PHIDP), no QC, plot 2nd tilt level, phase unfolding</p>
 
-2.	python lvl2_plot.py --plot2 -f KDDC20160525_001527_V06.gz -q None -p 1 -u phase
+2.	python lvl2_plot.py --plot2 -f KOUN20110524_224700_V06 -q None -p 1 -u phase
 
     *creates plot of REF and VR, no DBZ QC, plot 2nd title, phase unfolding*
 
-3.	python lvl2_plot.py --plot2 -f KDDC20160525_001527_V06.gz -q MetSignal -p 1 -u phase
+3.	python lvl2_plot.py --plot2 -f KOUN20110524_224700_V06 -q MetSignal -p 1 -u phase
 
     *creates plot of REF and VR, MetSig QC, plot 2nd title, phase unfolding*
 
 **Example command lines for opaws2d.py:**
 
-1.	python opaws2d.py -f KDDC20160525_001527_V06.gz -q None -p 1 –w -u phase
+1.	python opaws2d.py -f KOUN20110524_224700_V06 -q None -p 1 –w -u phase
 
     *opaws2d with no QC, plot 2nd tilt level, phase unfolding, -w to DART and netCDF files*
 
-2.	python opaws2d.py -f KDDC20160525_001527_V06.gz -q None -p 1 –w -u region
+2.	python opaws2d.py -f KOUN20110524_224700_V06 -q None -p 1 –w -u region
     *opaws2d with no QC, plot 2nd tilt level, region unfolding, write out DART and netCDF files*
 
-3.	python opaws2d.py -f KDDC20160525_001527_V06.gz -q MetSignal -u phase
+3.	python opaws2d.py -f KOUN20110524_224700_V06 -q MetSignal -u phase
     *opaws2d with MetSig QC, plot 2nd title, phase unfolding, write out DART and netCDF files*
-
-**_You can compare the outputs from your tests to the files in KDDC directory_**
 
 Parameters controling the regridding of the data can be found in the python dictionarys at the top of opaws2d.py.  They are structured to match many of the common parameters found in the OPAWS namelist (but not all features have been reproduced).  See the file for more details.
 
@@ -90,7 +88,7 @@ There are several current limitations of the software - and the velocity unfoldi
 
 <p> To test the scripts:  
 
-Copy from KDDC directory the file:  KDDC20160525_001527_V06.gz into the main directory.  Try several of the commands listed above.
+Copy from KOUN directory the file:  KOUN20110524_224700_V06 into the main directory.  Try several of the commands listed above.
 
 Lvl2 files will be placed in a directory called “images”, and opaws2d files will be placed in a directory called “opaws_files”.  
 

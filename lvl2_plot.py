@@ -2,6 +2,7 @@
 
 import matplotlib.pyplot as plt
 import pyart
+import ctables as cm
 import matplotlib
 import numpy as np
 import sys
@@ -37,8 +38,8 @@ _thres_vr_from_ref     = True
 _default_QC            = "Minimal"
 
 # Colortables
-_ref_ctable = pyart.graph.cm.NWSRef
-_vr_ctable  = pyart.graph.cm.Carbone42
+_ref_ctable = cm.NWSRef
+_vr_ctable  = cm.Carbone42
 
 # Range rings in km
 _plot_RangeRings = True
@@ -63,7 +64,7 @@ def mybasemap(glon, glat, r_lon, r_lat, scale = 1.0, supress_ticks = True,
               counties=False, states = False, lat_lines=_lat_lines, lon_lines=_lon_lines, 
               pickle = False, ax=None, **kwargs):
 
-   tt = timeit.clock()
+   tt = timeit.time()
    
    map = Basemap(llcrnrlon=glon.min(), llcrnrlat=glat.min(), \
                  urcrnrlon=glon.max(), urcrnrlat=glat.max(), \
@@ -100,16 +101,16 @@ def mybasemap(glon, glat, r_lon, r_lat, scale = 1.0, supress_ticks = True,
           s = map.readshapefile(shapefile,'shapeinfo',drawbounds=False)
 
           for shape in maplt.shapeinfo:
-              xx, yy = zip(*shape)
+              xx, yy = list(zip(*shape))
               map.plot(xx,yy,color=color,linewidth=linewidth,ax=ax)
 
    # pickle the class instance.
 
-   if _debug:  print(timeit.clock()-tt,' secs to create original Basemap instance')
+   if _debug:  print((timeit.time()-tt,' secs to create original Basemap instance'))
 
    if pickle:
       pickle.dump(map,open('mymaplt.pickle','wb'),-1)
-      print(timeit.clock()-tt,' secs to create original Basemap instance and pickle it')
+      print((timeit.time()-tt,' secs to create original Basemap instance and pickle it'))
 
    return map
 
@@ -134,8 +135,8 @@ def create_ppi_map(radar, xr, yr, plot_range_rings=_plot_RangeRings, ax=None, **
 
    map = mybasemap(lon, lat, radar_lon, radar_lat, ax=ax, **kwargs)
 
-   radar_x, radar_y = map(radar_lon, radar_lat)
-   xmap, ymap = map(lon, lat)
+   radar_x, radar_y = list(map(radar_lon, radar_lat))
+   xmap, ymap = list(map(lon, lat))
 
    if plot_range_rings:
       angle = np.linspace(0., 2.0 * np.pi, 360)
@@ -147,7 +148,7 @@ def create_ppi_map(radar, xr, yr, plot_range_rings=_plot_RangeRings, ax=None, **
    return map, xmap, ymap, radar_x, radar_y
    
 #############################################################################################
-def plot_ppi_map(radar, field, level = 0, cmap=pyart.graph.cm.Carbone42, vRange=None, var_label = None, \
+def plot_ppi_map(radar, field, level = 0, cmap=cm.Carbone42, vRange=None, var_label = None, \
                  plot_range_rings=True, ax=None, zoom = None, **kwargs):
                  
    start = radar.get_start(level)
@@ -191,7 +192,7 @@ def plot_ppi_map(radar, field, level = 0, cmap=pyart.graph.cm.Carbone42, vRange=
    plt.suptitle(time, fontsize=16)
    plt.title(title_string)
    
-   print("\n Completed plot for %s" % field)
+   print(("\n Completed plot for %s" % field))
      
    return 
      
@@ -200,9 +201,9 @@ def plot_ppi_map(radar, field, level = 0, cmap=pyart.graph.cm.Carbone42, vRange=
 
 if __name__ == "__main__":
 
-  print ' ================================================================================\n\n'
-  print '                          BEGIN PROGRAM lvl2_plot                   '
-  print '\n================================================================================\n'
+  print(' ================================================================================\n\n')
+  print('                          BEGIN PROGRAM lvl2_plot                   ')
+  print('\n================================================================================\n')
 
   parser = OptionParser()
   parser.add_option("-d", "--dir",       dest="dname",     default=None,  type="string", \
@@ -238,8 +239,8 @@ if __name__ == "__main__":
                      
   (options, args) = parser.parse_args()
   
-  print ''
-  print ' ================================================================================'
+  print('')
+  print(' ================================================================================')
   
   if not os.path.exists(options.out_dir):
     os.mkdir(options.out_dir)
@@ -250,10 +251,10 @@ if __name__ == "__main__":
   if options.dname == None:
           
     if options.fname == None:
-      print "\n\n ***** USER MUST SPECIFY NEXRAD LEVEL II (MESSAGE 31) FILE OR DIRECTORY! *****"
-      print "\n                         EXITING!\n\n"
+      print("\n\n ***** USER MUST SPECIFY NEXRAD LEVEL II (MESSAGE 31) FILE OR DIRECTORY! *****")
+      print("\n                         EXITING!\n\n")
       parser.print_help()
-      print
+      print()
       sys.exit(1)
       
     else:
@@ -265,9 +266,9 @@ if __name__ == "__main__":
 
   else:
     in_filenames = glob.glob("%s/*" % os.path.abspath(options.dname))
-    print("\n lvl2_plot:  Processing %d files in the directory:  %s\n" % (len(in_filenames), options.dname))
-    print("\n lvl2_plot:  First file is %s\n" % (in_filenames[0]))
-    print("\n lvl2_plot:  Last  file is %s\n" % (in_filenames[-1]))
+    print(("\n lvl2_plot:  Processing %d files in the directory:  %s\n" % (len(in_filenames), options.dname)))
+    print(("\n lvl2_plot:  First file is %s\n" % (in_filenames[0])))
+    print(("\n lvl2_plot:  Last  file is %s\n" % (in_filenames[-1])))
 
     if in_filenames[0][-3:] == "V06":
       for item in in_filenames:
@@ -279,11 +280,11 @@ if __name__ == "__main__":
   if options.unfold == "phase":
       unfold_type = "phase"
   elif options.unfold == "region":
-      print "\n lvl2_plot dealias_region_based unfolding will be used\n"
+      print("\n lvl2_plot dealias_region_based unfolding will be used\n")
       unfold_type = "region"
   else:
-      print "\n ***** INVALID OR NO VELOCITY DEALIASING METHOD SPECIFIED *****"
-      print "\n          NO VELOCITY UNFOLDING DONE...\n\n"
+      print("\n ***** INVALID OR NO VELOCITY DEALIASING METHOD SPECIFIED *****")
+      print("\n          NO VELOCITY UNFOLDING DONE...\n\n")
       unfold_type = None
       
   if options.shapefiles:
@@ -316,7 +317,7 @@ if __name__ == "__main__":
         vr_label = "Radial Velocity"
     else:
         try:
-            print("\n Trying %s-based unfolding method\n" % unfold_type)
+            print(("\n Trying %s-based unfolding method\n" % unfold_type))
             ret = velocity_unfold(volume, unfold_type=unfold_type, gatefilter=None) 
             vr_field = "unfolded velocity"
             vr_label = "Unfolded Radial Velocity"
@@ -340,7 +341,7 @@ if __name__ == "__main__":
         print("\n No quality control will be done on data\n")
         gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = False)
     else:
-        print("\n QC type:  %s \n" % options.qc)
+        print(("\n QC type:  %s \n" % options.qc))
         gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = _thres_vr_from_ref)
 
     ref_level = volume.sweep_table[options.level][0]
@@ -373,7 +374,7 @@ if __name__ == "__main__":
     
     outfile = "%s%4.2fDEG" % (out_filenames[n], volume.elevation['data'][options.level])
   
-    print("\n Saving file:  %s.png" % (outfile))
+    print(("\n Saving file:  %s.png" % (outfile)))
 
     plt.savefig("%s.%s" % (outfile, _file_type), format=_file_type, dpi=300)
 

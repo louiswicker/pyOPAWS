@@ -43,14 +43,15 @@ from radar_QC import *
 
 import cressman
 import pyart
+import ctables as cm
 
 import warnings
 warnings.filterwarnings("ignore")
 
 from pyproj import Proj
 import pylab as plt  
+
 from mpl_toolkits.basemap import Basemap
-from pyart.graph import cm
 
 
 # Ignore annoying warnings (unless the code breaks, then comment these lines out)
@@ -209,8 +210,8 @@ def vel_masking(vel, ref, volume):
 
 # Mask the radial velocity where dbz is masked
 
-   print(" Size of input VR  mask: %d" % np.sum(vel.data.mask))
-   print(" Size of input dBZ mask: %d" % np.sum(ref.data.mask))
+   print((" Size of input VR  mask: %d" % np.sum(vel.data.mask)))
+   print((" Size of input dBZ mask: %d" % np.sum(ref.data.mask)))
 
    vel.data.mask = np.logical_or(vel.data.mask, ref.data.mask)
 
@@ -225,11 +226,11 @@ def vel_masking(vel, ref, volume):
         
    if _grid_dict['max_height'] > 0:
       mask1 = (vel.zg - vel.radar_hgt) > _grid_dict['max_height']
-      print(" Size of height mask: %d" % np.sum(mask1))
+      print((" Size of height mask: %d" % np.sum(mask1)))
       mask2 = vel.data.mask
-      print(" Size of VR + dBZ mask: %d" % np.sum(mask2))
+      print((" Size of VR + dBZ mask: %d" % np.sum(mask2)))
       vel.data.mask = np.logical_or(mask1, mask2)
-      print(" Size of new mask: %d" % np.sum(vel.data.mask))
+      print((" Size of new mask: %d" % np.sum(vel.data.mask)))
       
    return vel
       
@@ -245,7 +246,7 @@ def grid_data(volume, field, LatLon=None):
    
        grid_spacing_xy = _grid_dict['grid_spacing_xy']
        domain_length   = _grid_dict['domain_radius_xy']
-       grid_pts_xy     = 1 + 2*np.int(domain_length/grid_spacing_xy)
+       grid_pts_xy     = 1 + 2*int(domain_length/grid_spacing_xy)
        nx, ny          = (grid_pts_xy, grid_pts_xy)
        radar_lat       = volume.latitude['data'][0]
        radar_lon       = volume.longitude['data'][0]
@@ -253,14 +254,14 @@ def grid_data(volume, field, LatLon=None):
        yg              = -domain_length + grid_spacing_xy * np.arange(grid_pts_xy)
        
        map = Proj(proj='lcc', ellps='WGS84', datum='WGS84', lat_1=truelat1, lat_2=truelat2, lat_0=radar_lat, lon_0=radar_lon)
-       xoffset, yoffset = map(radar_lon, radar_lat) 
-       lons, lats = map(xg, yg, inverse=True)
+       xoffset, yoffset = list(map(radar_lon, radar_lat)) 
+       lons, lats = list(map(xg, yg, inverse=True))
       
    else:  # grid based on model grid center LatLon
    
        grid_spacing_xy = _grid_dict['grid_spacing_xy']
-       nx              = 1 + np.int(_grid_dict['model_grid_size'][0] / grid_spacing_xy)
-       ny              = 1 + np.int(_grid_dict['model_grid_size'][1] / grid_spacing_xy)
+       nx              = 1 + int(_grid_dict['model_grid_size'][0] / grid_spacing_xy)
+       ny              = 1 + int(_grid_dict['model_grid_size'][1] / grid_spacing_xy)
        grid_pts_xy     = max(nx, ny)
        xg              = -0.5*_grid_dict['model_grid_size'][0] + grid_spacing_xy * np.arange(nx)
        yg              = -0.5*_grid_dict['model_grid_size'][1] + grid_spacing_xy * np.arange(ny)
@@ -269,8 +270,8 @@ def grid_data(volume, field, LatLon=None):
        
        map = Proj(proj='lcc', ellps='WGS84', datum='WGS84', lat_1=truelat1, lat_2=truelat2, lat_0=LatLon[0], lon_0=LatLon[1])
         
-       xoffset, yoffset = map(radar_lon, radar_lat)
-       lons, lats = map(xg, yg, inverse=True)
+       xoffset, yoffset = list(map(radar_lon, radar_lat))
+       lons, lats = list(map(xg, yg, inverse=True))
 
    if _grid_dict['anal_method'] == 'Cressman':
       anal_method = 1
@@ -285,25 +286,25 @@ def grid_data(volume, field, LatLon=None):
 
 ########################################################################
   
-   print '\n Gridding radar data with following parameters'
-   print ' ---------------------------------------------\n'
-   print ' Method of Analysis:      {}'.format(_grid_dict['anal_method'])
-   print ' Horizontal grid spacing: {} km'.format(grid_spacing_xy/1000.)
-   print ' Grid points in x,y:      {},{}'.format(int(nx),int(ny))
-   print ' Weighting function:      {}'.format(_grid_dict['anal_method'])
-   print ' Radius of Influence:     {} km'.format(_grid_dict['ROI']/1000.)
-   print ' Minimum gates:           {}'.format(min_count)
-   print ' Minimum weight:          {}'.format(min_weight)
-   print ' Minimum range:           {} km'.format(min_range/1000.)
-   print ' Map projection:          {}'.format(_grid_dict['projection'])
-   print ' Xoffset:                 {} km'.format(np.round(xoffset/1000.))
-   print ' Yoffset:                 {} km'.format(np.round(yoffset/1000.))
-   print ' Field to be gridded:     {}\n'.format(field) 
-   print ' Min / Max X grid loc:    {} <-> {} km\n'.format(0.001*xg[0], 0.001*xg[-1])
-   print ' Min / Max Y grid loc:    {} <-> {} km\n'.format(0.001*yg[0], 0.001*yg[-1])
-   print ' Min / Max Longitude:     {} <-> {} deg\n'.format(lons[0], lons[-1])
-   print ' Min / Max Latitude:      {} <-> {} deg\n'.format(lats[0], lats[-1])
-   print ' ---------------------------------------------\n' 
+   print('\n Gridding radar data with following parameters')
+   print(' ---------------------------------------------\n')
+   print(' Method of Analysis:      {}'.format(_grid_dict['anal_method']))
+   print(' Horizontal grid spacing: {} km'.format(grid_spacing_xy/1000.))
+   print(' Grid points in x,y:      {},{}'.format(int(nx),int(ny)))
+   print(' Weighting function:      {}'.format(_grid_dict['anal_method']))
+   print(' Radius of Influence:     {} km'.format(_grid_dict['ROI']/1000.))
+   print(' Minimum gates:           {}'.format(min_count))
+   print(' Minimum weight:          {}'.format(min_weight))
+   print(' Minimum range:           {} km'.format(min_range/1000.))
+   print(' Map projection:          {}'.format(_grid_dict['projection']))
+   print(' Xoffset:                 {} km'.format(np.round(xoffset/1000.)))
+   print(' Yoffset:                 {} km'.format(np.round(yoffset/1000.)))
+   print(' Field to be gridded:     {}\n'.format(field)) 
+   print(' Min / Max X grid loc:    {} <-> {} km\n'.format(0.001*xg[0], 0.001*xg[-1]))
+   print(' Min / Max Y grid loc:    {} <-> {} km\n'.format(0.001*yg[0], 0.001*yg[-1]))
+   print(' Min / Max Longitude:     {} <-> {} deg\n'.format(lons[0], lons[-1]))
+   print(' Min / Max Latitude:      {} <-> {} deg\n'.format(lats[0], lats[-1]))
+   print(' ---------------------------------------------\n') 
 
 ########################################################################
 #
@@ -339,7 +340,7 @@ def grid_data(volume, field, LatLon=None):
            return gc
 
 
-   tt = timeit.clock()
+   tt = timeit.time()
 
 #####################################################################################   
    try:
@@ -395,12 +396,12 @@ def grid_data(volume, field, LatLon=None):
        else:
            new[n] = np.ma.masked_all((grid_pts_xy, grid_pts_xy))
         
-       print(" Sweep: %2.2d Elevation: %5.2f  Number of valid grid points:  %d" % (n, elevations[n],np.sum(new[n].mask==False)))
+       print((" Sweep: %2.2d Elevation: %5.2f  Number of valid grid points:  %d" % (n, elevations[n],np.sum(new[n].mask==False))))
 
        if field == "reflectivity":
            new[n].mask = np.logical_or(new[n].mask, new[n] < _radar_parameters['min_dbz_analysis'])
-           print(" Sweep: %2.2d Elevation: %5.2f  Number of valid reflectivity points:  %d" % \
-                        (n, elevations[n],np.sum(new[n].mask==False)))
+           print((" Sweep: %2.2d Elevation: %5.2f  Number of valid reflectivity points:  %d" % \
+                        (n, elevations[n],np.sum(new[n].mask==False))))
 
    # Create z-field
 
@@ -420,7 +421,7 @@ def grid_data(volume, field, LatLon=None):
        new_mask = (tmp == -99999.)
        zgrid[n] = np.ma.array(tmp, mask=new_mask)
     
-   print("\n %f secs to run superob analysis for all levels \n" % (timeit.clock()-tt))
+   print(("\n %f secs to run superob analysis for all levels \n" % (timeit.time()-tt)))
 
    return Gridded_Field("data_grid", field = field, data = new, basemap = map, 
                         xg = xg, yg = yg, zg = zgrid,                   
@@ -449,11 +450,11 @@ def plot_shapefiles(map, shapefiles=None, color='k', linewidth=0.5, counties=Fal
                     s = map.readshapefile(shapefile,'myshapes',drawbounds=False)
 
                     for shape in map.counties:
-                        xx, yy = zip(*shape)
+                        xx, yy = list(zip(*shape))
                         map.plot(xx, yy, color=color, linewidth=linewidth, ax=ax, zorder=4)
 
         except OSError:
-            print "PLOT_SHAPEFILES:  NO SHAPEFILE ENV VARIABLE FOUND "
+            print("PLOT_SHAPEFILES:  NO SHAPEFILE ENV VARIABLE FOUND ")
             
     if counties:
             map.drawcounties(ax=ax, linewidth=0.5, color='k', zorder=5)
@@ -472,7 +473,7 @@ def plot_gridded(ref, vel, sweep, fsuffix=None, dir=".", shapefiles=None, intera
   cmapr.set_bad('white',1.0)
   cmapr.set_under('white',1.0)
 
-  cmapv = cm.Carbone42
+  cmapv = cm.NWSVel
   cmapv.set_bad('white',1.)
   cmapv.set_under('black',1.)
   cmapv.set_over('black',1.)
@@ -487,7 +488,7 @@ def plot_gridded(ref, vel, sweep, fsuffix=None, dir=".", shapefiles=None, intera
 # Create png file label
 
   if fsuffix == None:
-      print("\n opaws2D.grid_plot:  No output file name is given, writing to %s" % "VR_RF_...png")
+      print(("\n opaws2D.grid_plot:  No output file name is given, writing to %s" % "VR_RF_...png"))
       filename = "%s/VR_RF_%2.2d_plot.pdf" % (dir, sweep)
   else:
        filename = "%s_%2.2d.pdf" % (os.path.join(dir, fsuffix), sweep)
@@ -530,8 +531,8 @@ def plot_gridded(ref, vel, sweep, fsuffix=None, dir=".", shapefiles=None, intera
   else:
       plot_shapefiles(bgmap, counties=_plot_counties, ax=ax1)
  
-  bgmap.drawparallels(range(10,80,1),    labels=[1,0,0,0], linewidth=0.5, ax=ax1)
-  bgmap.drawmeridians(range(-170,-10,1), labels=[0,0,0,1], linewidth=0.5, ax=ax1)
+  bgmap.drawparallels(list(range(10,80,1)),    labels=[1,0,0,0], linewidth=0.5, ax=ax1)
+  bgmap.drawmeridians(list(range(-170,-10,1)), labels=[0,0,0,1], linewidth=0.5, ax=ax1)
 
   im1 = bgmap.pcolormesh(xe, ye, ref.data[sweep], cmap=cmapr, vmin = _ref_scale[0], vmax = _ref_scale[1], ax=ax1)
   cbar = bgmap.colorbar(im1, location='right')
@@ -574,8 +575,8 @@ def plot_gridded(ref, vel, sweep, fsuffix=None, dir=".", shapefiles=None, intera
   else:
       plot_shapefiles(bgmap, counties=_plot_counties, ax=ax2)
     
-  bgmap.drawparallels(range(10,80,1),labels=[1,0,0,0], linewidth=0.5, ax=ax2)
-  bgmap.drawmeridians(range(-170,-10,1),labels=[0,0,0,1],linewidth=0.5, ax=ax2)
+  bgmap.drawparallels(list(range(10,80,1)),labels=[1,0,0,0], linewidth=0.5, ax=ax2)
+  bgmap.drawmeridians(list(range(-170,-10,1)),labels=[0,0,0,1],linewidth=0.5, ax=ax2)
   
   im1 = bgmap.pcolormesh(xe, ye, vel.data[sweep], cmap=cmapv, vmin=_vr_scale[0], vmax=_vr_scale[1], ax=ax2)
   cbar = bgmap.colorbar(im1,location='right')
@@ -612,7 +613,7 @@ def write_radar_file(ref, vel, filename=None):
   _calendar      = 'standard'
 
   if filename == None:
-      print("\n write_DART_ascii:  No output file name is given, writing to %s" % "obs_seq.txt")
+      print(("\n write_DART_ascii:  No output file name is given, writing to %s" % "obs_seq.txt"))
       filename = "obs_seq.nc"
   else:
       dirname = os.path.dirname(filename)
@@ -658,13 +659,13 @@ def write_radar_file(ref, vel, filename=None):
       
   dtime   = ncdf.num2date(ref.time['data'].mean(), ref.time['units'])
   days    = ncdf.date2num(dtime, units = "days since 1601-01-01 00:00:00")
-  seconds = np.int(86400.*(days - np.floor(days)))  
+  seconds = int(86400.*(days - np.floor(days)))  
   
 # create the fileput filename and create new netCDF4 file
 
 #filename = os.path.join(path, "%s_%s%s" % ("Inflation", DT.strftime("%Y-%m-%d_%H:%M:%S"), ".nc" ))
 
-  print "\n -->  Writing %s as the radar file..." % (filename)
+  print("\n -->  Writing %s as the radar file..." % (filename))
     
   rootgroup = ncdf.Dataset(filename, 'w', format='NETCDF4')
       
@@ -737,10 +738,10 @@ def write_radar_file(ref, vel, filename=None):
 
 if __name__ == "__main__":
 
-   print ' ================================================================================'
-   print ''
-   print '                   BEGIN PROGRAM opaws2D                     '
-   print ''
+   print(' ================================================================================')
+   print('')
+   print('                   BEGIN PROGRAM opaws2D                     ')
+   print('')
 
    parser = OptionParser()
    
@@ -791,8 +792,8 @@ if __name__ == "__main__":
 
    (options, args) = parser.parse_args()
   
-   print ''
-   print ' ================================================================================'
+   print('')
+   print(' ================================================================================')
 
 # Create directory for output files
   
@@ -805,12 +806,12 @@ if __name__ == "__main__":
    if options.dname == None:
           
        if options.fname == None:
-           print "\n\n ***** USER MUST SPECIFY NEXRAD LEVEL II (MESSAGE 31) FILE! *****"
-           print "\n\n *****                     OR                               *****"
-           print "\n\n *****               CFRADIAL FILE!                         *****"
-           print "\n                         EXITING!\n\n"
+           print("\n\n ***** USER MUST SPECIFY NEXRAD LEVEL II (MESSAGE 31) FILE! *****")
+           print("\n\n *****                     OR                               *****")
+           print("\n\n *****               CFRADIAL FILE!                         *****")
+           print("\n                         EXITING!\n\n")
            parser.print_help()
-           print
+           print()
            sys.exit(1)
       
        else:
@@ -843,14 +844,14 @@ if __name__ == "__main__":
                out_filenames.append(strng) 
 
    if options.unfold == "phase":
-       print "\n opaws2D dealias_unwrap_phase unfolding will be used\n"
+       print("\n opaws2D dealias_unwrap_phase unfolding will be used\n")
        unfold_type = "phase"
    elif options.unfold == "region":
-       print "\n opaws2D dealias_region_based unfolding will be used\n"
+       print("\n opaws2D dealias_region_based unfolding will be used\n")
        unfold_type = "region"
    else:
-       print "\n ***** INVALID OR NO VELOCITY DEALIASING METHOD SPECIFIED *****"
-       print "\n          NO VELOCITY UNFOLDING DONE...\n\n"
+       print("\n ***** INVALID OR NO VELOCITY DEALIASING METHOD SPECIFIED *****")
+       print("\n          NO VELOCITY UNFOLDING DONE...\n\n")
        unfold_type = None
 
    if options.newse:
@@ -879,15 +880,15 @@ if __name__ == "__main__":
 
    if options.window == None:
        print("\n NO WINDOW SUPPLIED, PROCESSING WHOLE DIRECTORY.... \n ")
-       print("\n opaws2D:  Processing %d files in the directory:  %s\n" % (len(in_filenames), options.dname))
-       print("\n opaws2D:  First file is %s" % (in_filenames[0]))
-       print("\n opaws2D:  Last  file is %s" % (in_filenames[-1]))
+       print(("\n opaws2D:  Processing %d files in the directory:  %s\n" % (len(in_filenames), options.dname)))
+       print(("\n opaws2D:  First file is %s" % (in_filenames[0])))
+       print(("\n opaws2D:  Last  file is %s" % (in_filenames[-1])))
    else:
        print("\n WINDOW IS SUPPLIED, WILL LOOK FOR INDIVIDUAL FILE.... \n ")
        start_time = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[0])
        stop_time  = DT.datetime.strptime(options.window, "%Y,%m,%d,%H,%M") + DT.timedelta(minutes=_window_param[1])
-       print("\n WINDOW_START:  %s" % start_time.strftime("%Y,%m,%d,%H,%M") )
-       print(" WINDOW_END:    %s" % stop_time.strftime("%Y,%m,%d,%H,%M") )
+       print(("\n WINDOW_START:  %s" % start_time.strftime("%Y,%m,%d,%H,%M") ))
+       print((" WINDOW_END:    %s" % stop_time.strftime("%Y,%m,%d,%H,%M") ))
                      
 # Read input file and create radar object
 
@@ -901,25 +902,25 @@ if __name__ == "__main__":
            try:
                parsed_file_DT = "%s" % re.split(parse_radar_name, os.path.basename(fname))[1]
            except IndexError:
-               print os.path.basename(fname)
+               print(os.path.basename(fname))
                pass
 
            file_time = DT.datetime.strptime("%s" % parsed_file_DT[0:13], "%Y%m%d_%H%M")
-           print file_time
+           print(file_time)
            if file_time < start_time or file_time >= stop_time:
                continue
            else:
-               print n
-               print("\n FILE TIME WITHIN WINDOW:   %s" % file_time.strftime("%Y,%m,%d,%H,%M") )
-               print '\n Reading: {}\n'.format(fname)
-               print '\n Writing: {}\n'.format(out_filenames[n])
+               print(n)
+               print(("\n FILE TIME WITHIN WINDOW:   %s" % file_time.strftime("%Y,%m,%d,%H,%M") ))
+               print('\n Reading: {}\n'.format(fname))
+               print('\n Writing: {}\n'.format(out_filenames[n]))
    
        tim0 = timeit.time()
 
  # the check for file size is to make sure there is data in the LVL2 file
        try:
            if os.path.getsize(fname) < 2048000:
-               print '\n File {} is less than 2 mb, skipping...'.format(fname)
+               print('\n File {} is less than 2 mb, skipping...'.format(fname))
                continue
        except:
            continue
@@ -938,12 +939,12 @@ if __name__ == "__main__":
                                                  delay_field_loading=False, 
                                                  station=None, scans=None, linear_interp=True)
          except:
-           print '\n File {} cannot be read, skipping...\n'.format(fname)
+           print('\n File {} cannot be read, skipping...\n'.format(fname))
            continue
 
        opaws2D_io_cpu = timeit.time() - tim0
   
-       print "\n Time for reading in LVL2: {} seconds".format(opaws2D_io_cpu)
+       print("\n Time for reading in LVL2: {} seconds".format(opaws2D_io_cpu))
 
 # Modern level-II files need to be mapped to figure out where the super-res velocity and reflectivity fields are located in file
  
@@ -953,19 +954,19 @@ if __name__ == "__main__":
 
        tim0 = timeit.time()      
 
-       print '\n ================================================================================'
+       print('\n ================================================================================')
 
        if unfold_type == None:
            vr_field = "velocity"
            vr_label = "Radial Velocity"
        else:
            try:
-               print("\n Trying %s-based unfolding method\n" % unfold_type)
+               print(("\n Trying %s-based unfolding method\n" % unfold_type))
                ret = velocity_unfold(volume, unfold_type=unfold_type, gatefilter=None) 
                vr_field = "unfolded velocity"
                vr_label = "Unfolded Radial Velocity"
            except:
-               print("\n ----> %s unfolding method has failed!! Trying alternate unfolding method\n" % unfold_type)
+               print(("\n ----> %s unfolding method has failed!! Trying alternate unfolding method\n" % unfold_type))
                try:
                    unfold_type2 = "region"
                    if unfold_type == "region":    
@@ -980,9 +981,9 @@ if __name__ == "__main__":
 
        opaws2D_unfold_cpu = timeit.time() - tim0
 
-       print "\n Time for unfolding velocity: {} seconds".format(opaws2D_unfold_cpu)
+       print("\n Time for unfolding velocity: {} seconds".format(opaws2D_unfold_cpu))
 
-       print '\n ================================================================================'
+       print('\n ================================================================================')
   
 # Now we do QC
 
@@ -993,15 +994,15 @@ if __name__ == "__main__":
            gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = False, \
                                     max_range = _radar_parameters['max_range'])
        else:
-           print("\n QC type:  %s " % options.qc)
+           print(("\n QC type:  %s " % options.qc))
            gatefilter = volume_prep(volume, QC_type = options.qc, thres_vr_from_ref = _thres_vr_from_ref, \
                                     max_range = _radar_parameters['max_range'])
 
 
        opaws2D_QC_cpu = timeit.time() - tim0
        
-       print "\n Time for quality controling the data: {} seconds".format(opaws2D_QC_cpu)
-       print '\n ================================================================================'
+       print("\n Time for quality controling the data: {} seconds".format(opaws2D_QC_cpu))
+       print('\n ================================================================================')
 
        tim0 = timeit.time()
        
@@ -1024,9 +1025,9 @@ if __name__ == "__main__":
     
        opaws2D_regrid_cpu = timeit.time() - tim0
   
-       print "\n Time for gridding fields: {} seconds".format(opaws2D_regrid_cpu)
+       print("\n Time for gridding fields: {} seconds".format(opaws2D_regrid_cpu))
        
-       print '\n ================================================================================'
+       print('\n ================================================================================')
 
        if plot_grid:
            fplotname = os.path.basename(out_filenames[n])
@@ -1045,6 +1046,6 @@ if __name__ == "__main__":
   
    opaws2D_cpu_time = timeit.time() - t0
 
-   print "\n Time for opaws2D operations: {} seconds".format(opaws2D_cpu_time)
+   print("\n Time for opaws2D operations: {} seconds".format(opaws2D_cpu_time))
 
-   print "\n PROGRAM opaws2D COMPLETED\n"
+   print("\n PROGRAM opaws2D COMPLETED\n")

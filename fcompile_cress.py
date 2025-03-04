@@ -4,9 +4,9 @@ import os
 
 # remove all module files in directory - this can trip you up bad!
 
-print "\n=====================================================\n"
+print("\n=====================================================\n")
 print("   ---> Removing all module files...safety first!")
-print "\n=====================================================\n"
+print("\n=====================================================\n")
 
 cmd = "f2py --fcompiler='gnu95' --f90flags='-O3' -c -m cressman cressman.f90"
 os.system(cmd)

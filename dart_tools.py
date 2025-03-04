@@ -82,21 +82,21 @@ def ObType_LookUp(name,DART_name=False,Print_Table=False):
                     }
       
       if Print_Table:
-            print
-            print "VALID INPUT VARIABLE NAME              KIND  DART NAME"
-            print "=========================================================================="
-            for key in Look_Up_Table.keys():
-                  print "%35s    %3d    %s" % (key, Look_Up_Table[key][0], Look_Up_Table[key][1])
+            print()
+            print("VALID INPUT VARIABLE NAME              KIND  DART NAME")
+            print("==========================================================================")
+            for key in list(Look_Up_Table.keys()):
+                  print("%35s    %3d    %s" % (key, Look_Up_Table[key][0], Look_Up_Table[key][1]))
             return
       
       name2 = name.upper().strip()
-      if Look_Up_Table.has_key(name2):
+      if name2 in Look_Up_Table:
             if DART_name == True:
                   return Look_Up_Table[name2][0], Look_Up_Table[name2][1]
             else:
                  return Look_Up_Table[name2][0]
       else:
-            print "ObType_LookUp cannot find variable:  ", name, name2
+            print("ObType_LookUp cannot find variable:  ", name, name2)
             raise SystemExit
 
 ########################################################################
@@ -206,7 +206,7 @@ def beam_elv(sfc_range, z):
 def write_DART_ascii(obs, filename=None, obs_error=None, zero_dbz_obtype=True, grid_dict=None):
 
   if filename == None:
-      print("\n write_DART_ascii:  No output file name is given, writing to %s" % "obs_seq.txt")
+      print(("\n write_DART_ascii:  No output file name is given, writing to %s" % "obs_seq.txt"))
       filename = "obs_seq.out"
   else:
       dirname = os.path.dirname(filename)
@@ -214,7 +214,7 @@ def write_DART_ascii(obs, filename=None, obs_error=None, zero_dbz_obtype=True, g
       filename =  os.path.join(dirname, basename)
       
   if obs_error == None:
-      print "write_DART_ascii:  No obs error defined for observation, exiting"
+      print("write_DART_ascii:  No obs error defined for observation, exiting")
       raise SystemExit
 
 # Open ASCII file for DART obs to be written into.  We will add header info afterward
@@ -225,7 +225,7 @@ def write_DART_ascii(obs, filename=None, obs_error=None, zero_dbz_obtype=True, g
 #      an array, and it will extract the indices for you automatically..so create a single 
 #      loop over a MD array is very simple....
 
-  print("\n Writing %s to file...." % obs.field.upper())
+  print(("\n Writing %s to file...." % obs.field.upper()))
     
   data       = obs.data
   lats       = np.radians(obs.lats)
@@ -274,7 +274,7 @@ def write_DART_ascii(obs, filename=None, obs_error=None, zero_dbz_obtype=True, g
 #  mask_check = data.mask && numpy.isnan().any()
 
   data_length = np.sum(data.mask[:]==False)
-  print("\n Number of good observations:  %d" % data_length)
+  print(("\n Number of good observations:  %d" % data_length))
   
 # Create a multidimension iterator to move through 3D array creating obs
  
@@ -377,7 +377,7 @@ def write_DART_ascii(obs, filename=None, obs_error=None, zero_dbz_obtype=True, g
 
           fi.write("    %20.14f  \n" % o_error**2 )
 
-          if nobs % 1000 == 0: print(" write_DART_ascii:  Processed observation # %d" % nobs)
+          if nobs % 1000 == 0: print((" write_DART_ascii:  Processed observation # %d" % nobs))
   
       it.iternext()
       
@@ -422,11 +422,11 @@ def write_DART_ascii(obs, filename=None, obs_error=None, zero_dbz_obtype=True, g
   
   fi.close()
   
-  print("\n write_DART_ascii:  Created ascii DART file, N = %d written" % nobs)
+  print(("\n write_DART_ascii:  Created ascii DART file, N = %d written" % nobs))
   
   if kind == ObType_LookUp("REFLECTIVITY") and zero_dbz_obtype and nobs_clearair > 0:
-      print(" write_DART_ascii:  Number of clear air obs:             %d" % nobs_clearair)
-      print(" write_DART_ascii:  Number of non-zero reflectivity obs: %d" % (nobs - nobs_clearair))
+      print((" write_DART_ascii:  Number of clear air obs:             %d" % nobs_clearair))
+      print((" write_DART_ascii:  Number of non-zero reflectivity obs: %d" % (nobs - nobs_clearair)))
 
   return
   
@@ -437,7 +437,7 @@ def write_netcdf_radar_file(ref, vel, filename=None):
    _calendar      = 'standard'
 
    if filename == None:
-       print("\n write_DART_ascii:  No output file name is given, writing to %s" % "obs_seq.nc")
+       print(("\n write_DART_ascii:  No output file name is given, writing to %s" % "obs_seq.nc"))
        filename = "obs_seq.nc"
    else:
        dirname = os.path.dirname(filename)
@@ -489,7 +489,7 @@ def write_netcdf_radar_file(ref, vel, filename=None):
 
 #filename = os.path.join(path, "%s_%s%s" % ("Inflation", DT.strftime("%Y-%m-%d_%H:%M:%S"), ".nc" ))
 
-   print "\n -->  Writing %s as the radar file..." % (filename)
+   print("\n -->  Writing %s as the radar file..." % (filename))
    
    rootgroup = ncdf.Dataset(filename, 'w', format='NETCDF4')
      

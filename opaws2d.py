@@ -741,7 +741,7 @@ if __name__ == "__main__":
            help = "Function to use for the weight process, valid strings are:  Cressman or Barnes")
           
    parser.add_option("-q", "--qc", dest="qc", default="Minimal",  type="string",     \
-           help = "Type of QC corrections on reflectivity or velocity.  Valid:  None, Minimal, MetSignal, A1")  
+           help = "Type of QC corrections on reflectivity or velocity.  Valid:  None, Minimal, MetSignal")  
 
    parser.add_option(     "--dx",     dest="dx",   default=None, type="float", \
            help = "Analysis grid spacing in meters for superob resolution")

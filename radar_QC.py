@@ -1,4 +1,8 @@
-####
+#######
+#
+# Based on paper:  https://doi.org/10.1175/JTECH-D-15-0239.1
+#
+#######
 
 import sys
 import numpy as np
@@ -15,6 +19,8 @@ _min_dbz               = 10.
 _spw_filter            = 5.0
 _rhv_filter            = 0.90
 _zdr_filter            = 2.0
+
+_met_threshold         = 0.90 # Values between 0.6 and 0.8 (Krause 2016)
 
 # This turns debugging info
 
@@ -145,10 +151,10 @@ def texture(input, radius=3, oneD=False):
     i2 = input.filled(fill_value=np.nan)
     
     if len(i2.shape) == 1 or oneD == True:
-        kernel = np.ones((radius))/np.float(radius)
+        kernel = np.ones((radius))/float(radius)
         kernel2 = kernel
     else:
-        kernel = np.ones((radius,radius))/np.float(radius**2)
+        kernel = np.ones((radius,radius))/float(radius**2)
         kernel2 = kernel
 
     if len(i2.shape) == 2 and oneD == True:       
@@ -245,7 +251,7 @@ def MetSignal(radar, sweep = 0, v_sweep = None):
        signal_value    = np.zeros(dbz.shape[1])
        signal_strength = np.zeros(dbz.shape[1]) 
        weight          = np.zeros(dbz.shape[1]) 
-       sump            = np.zeros(dbz.shape[1], dtype=np.int) 
+       sump            = np.zeros(dbz.shape[1], dtype=int) 
        
        signal_value = signal_value + dbz_weight*trap4point(dbz[na],10.0,30.0,FLT_MAX,FLT_MAX)
        weight       = weight + np.where(dbz[na].mask == False, dbz_weight, 0.0)
@@ -280,15 +286,15 @@ def MetSignal(radar, sweep = 0, v_sweep = None):
 
 # RhoHV < 0.65
 
-   mask = np.logical_and((rhv < 0.65), (metsignal >= met_threshold))   
+   mask = np.logical_and((rhv < 0.65), (metsignal >= _met_threshold))   
    metsignal = np.where(mask, -5.0, metsignal)
 
 # Zdr < -4.5
-   mask = np.logical_and((zdr  < -4.5), (metsignal >= met_threshold))   
+   mask = np.logical_and((zdr  < -4.5), (metsignal >= _met_threshold))   
    metsignal = np.where(mask, -5.1, metsignal)
 
 # Zdr > 4.5
-   mask = np.logical_and((zdr > 4.5), (metsignal >= met_threshold))   
+   mask = np.logical_and((zdr > 4.5), (metsignal >= _met_threshold))   
    metsignal = np.where(mask, -5.2, metsignal)
 
 # Add metsignal field to volume object

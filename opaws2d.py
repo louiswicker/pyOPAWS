@@ -6,16 +6,11 @@
 #          Gridded data is then written out to a DART       #
 #          format file for assimilation.                    #
 #                                                           #
-#       Python package requirements:                        #
-#       ----------------------------                        #
-#       numpy                                               #
-#       scipy                                               #
-#       matplotlib                                          #
-#       pyart (ARM-DOE python radar toolkit)                #   
-#       pyproj                                              # 
-#       netCDF4                                             #
-#       matplotlib                                          #
-#       optparse                                            #
+#  Python package requirements:                             #
+#  ----------------------------                             #
+#  Create the python environment needed by the cmd:         #
+#                                                           #
+#         "conda env create -f environment.yml"             #
 #                                                           #
 #      Originally coded by Blake Allen, August 2016         #
 #############################################################
@@ -28,6 +23,8 @@ import sys
 import glob
 import re
 import time as timeit
+
+import yaml
 
 import numpy as np
 import scipy.interpolate
@@ -49,6 +46,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 from pyproj import Proj
+
 import pylab as plt  
 
 from mpl_toolkits.basemap import Basemap
@@ -81,46 +79,19 @@ _vr_scale  = (-40.,40.)
 # Need for Lambert conformal (default) coordinate projection
 truelat1, truelat2 = 30.0, 60.0
 
-# Parameter dict for Gridding
-_grid_dict = {
-              'grid_spacing_xy' : 3000.,         # meters
-              'domain_radius_xy': 150000.,       # meters
-              'anal_method'     : 'Cressman',    # options are Cressman, Barnes (1-pass)
-              'ROI'             : 1000.,         # Cressman ~ analysis_grid * sqrt(2), Barnes ~ largest data spacing in radar
-              'min_count'       : 3,             # regular radar data ~3, high-res radar data ~ 10
-              'min_weight'      : 0.2,           # min weight for analysis Cressman ~ 0.3, Barnes ~ 2
-              'min_range'       : 10000.,        # min distance away from the radar for valid analysis (meters)
-              'projection'      : 'lcc',         # map projection to use for gridded data
-              'mask_vr_with_dbz': True,
-              '0dbz_obtype'     : True,
-              'thin_zeros'      : 4,
-              'halo_footprint'  : 3,
-              'nthreads'        : 1,
-              'max_height'      : 10000.,
-              'MRMS_zeros'      : [True,      6000.], # True: creates a single level of zeros where composite DBZ < _dbz_min
-              'model_grid_size' : [750000., 750000.]  # Used to create a common grid for all observations (special option) 
-             }
-
-# Parameter dict setting radar data parameters
-               
-_radar_parameters = {
-                     'min_dbz_analysis': 25.0, 
-                     'max_range': 150000.,
-                     'max_Nyquist_factor': 4,                    # dont allow output of velocities > Nyquist*factor
-                     'field_label_trans': [False, "DBZC", "VR"]  # RaxPol 31 May - must specify for edit sweep files
-                    }
-
-# Dict for the standard deviation of obs_error for reflectivity or velocity (these values are squared when written to DART) 
-           
-_obs_errors = {
-                'reflectivity'  : 5.0,
-                '0reflectivity' : 5.0, 
-                'velocity'      : 3.0
-              }
-        
 # List for when window is used to find a file within a specific window - units are minutes
            
 _window_param = [ -5, 2 ]
+
+#=========================================================================================
+# read in OPAWS configuration file
+
+with open("opaws_config.yml","r") as file_object:
+  config_params=yaml.load(file_object,Loader=yaml.SafeLoader)
+
+_grid_dict        = config_params['_grid_param']
+_obs_errors       = config_params['_obs_errors']
+_radar_parameters = config_params['_radar_parameters']
 
 #=========================================================================================
 # Class variable used as container
@@ -795,6 +766,8 @@ if __name__ == "__main__":
    print('')
    print(' ================================================================================')
 
+
+#=========================================================================================
 # Create directory for output files
   
    if not os.path.exists(options.out_dir):

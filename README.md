@@ -41,13 +41,14 @@
 1.	python lvl2_plot.py -f KOUN20110524_224700_V06 -q None -p 1 -u phase
     <p>creates plot of 6 variables (REF, VR, SPEC_W, Zdr, KDP, PHIDP), no QC, plot 2nd tilt level, phase unfolding</p>
 
-2.	python lvl2_plot.py --plot2 -f KOUN20110524_224700_V06 -q None -p 1 -u phase
+2.	python lvl2_plot.py --plot2 -f KOUN20110524_224700_V06 -q Minimal -p 1 -u phase
 
-    *creates plot of REF and VR, no DBZ QC, plot 2nd title, phase unfolding*
+    *creates plot of REF and VR, minimal QC on DBZ, plot 2nd title, phase unfolding*
 
 3.	python lvl2_plot.py --plot2 -f KOUN20110524_224700_V06 -q MetSignal -p 1 -u phase
 
     *creates plot of REF and VR, MetSig QC, plot 2nd title, phase unfolding*
+    * Note the MetSignal QC can be pretty harsh - the algorithm may not be implemented accurately, use with caution
 
 **Example command lines for opaws2d.py:**
 
